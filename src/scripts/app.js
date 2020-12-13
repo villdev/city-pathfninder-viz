@@ -1,11 +1,14 @@
 import THREE from './three.r110.js';
 import TweenMax from './tweenmax.1.20.3';
+import gsap from "./gsap.min";
 import OBJLoader from './three.r110.objloader';
 import OrbitControls from './three.r110.orbitcontrols';
+// import FirstPersonControls from './FirstPersonControls';
 import 'styles/index.css';
 
 THREE = window.THREE;
 THREE.OrbitControls = OrbitControls;
+// THREE.FirstPersonControls = FirstPersonControls;
 THREE.OBJLoader  = OBJLoader;
 
 export default class App {
@@ -26,6 +29,7 @@ export default class App {
 
     this.createScene();
     this.createCamera();
+    // this.addControls();
     this.addCameraControls();
     this.addFloor();
     this.addBackgroundShape();
@@ -45,7 +49,7 @@ export default class App {
     };
 
     this.addPointLight(this.pointLightObj3);
-    this.helperObj();
+    // this.helperObj();
   }
   helperObj() {
     const axesHelper = new THREE.AxesHelper( 100 );
@@ -53,6 +57,9 @@ export default class App {
 
     const helper = new THREE.CameraHelper( this.camera );
     scene.add( helper );
+
+    const planeHelper = new THREE.PlaneHelper( this.backgroundShape, 1, 0xffff00 );
+    scene.add( planeHelper );
   }
 
   createScene() {
@@ -71,17 +78,34 @@ export default class App {
 
   createCamera() {
     // this.camera = new THREE.PerspectiveCamera(20, this.width / this.height, 1, 1000);
-    this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 1, 1000);
-    this.camera.position.set(3, 50, 155);
+    this.camera = new THREE.PerspectiveCamera(30, this.width / this.height, 1, 1000);
+    // this.camera.position.set(3, 50, 155);
+    this.camera.position.set(3, 20, 80);
 
     this.scene.add(this.camera);
   }
+
+  // addControls() {
+  //   document.querySelector(".first-person").addEventListener("click", (e)=> {
+  //     this.addCameraControls();
+  //   })
+  //   document.querySelector(".third-person").addEventListener("click", (e)=> {
+  //     this.addFirstPersonCameraControls();
+  //   })
+
+  // }
 
   addCameraControls() {
     this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
 
     this.controls.enabled = true;
   }
+
+  // addFirstPersonCameraControls() {
+  //   this.controls = new THREE.FirstPersonControls( this.camera, this.renderer.domElement );
+	// 	this.controls.movementSpeed = 1000;
+	// 	this.controls.lookSpeed = 0.1;
+  // }
 
   addSpotLight() {
     const light = { color: '#ff0000', x: 641, y: -462, z: 509 };
@@ -101,7 +125,7 @@ export default class App {
   }
 
   addBackgroundShape() {
-    const planeGeometry = new THREE.PlaneGeometry(400, 100);
+    const planeGeometry = new THREE.PlaneGeometry(600, 200);
     const planeMaterial = new THREE.MeshPhysicalMaterial({ color: '#fff' });
     this.backgroundShape = new THREE.Mesh(planeGeometry, planeMaterial);
 
@@ -169,12 +193,14 @@ export default class App {
 
   addFloor() {
     const floor = { color: '#000000' };
+    // const floor = { color: '#ffffff' };
     const planeGeometry = new THREE.PlaneGeometry(200, 200);
-    const planeMaterial = new THREE.MeshStandardMaterial({
+    // const planeMaterial = new THREE.MeshStandardMaterial({
+    const planeMaterial = new THREE.MeshBasicMaterial({
       color: floor.color,
-      metalness: 0,
-      emissive: '#000000',
-      roughness: 0,
+      // metalness: 0,
+      // emissive: '#000000',
+      // roughness: 0,
     });
 
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -227,7 +253,8 @@ export default class App {
     this.sortBuildingsByDistance();
 
     this.buildings.forEach((building, index) => {
-      TweenMax.to(building.position, .6 + (index / 4000), { y: 1, ease: Quint.easeOut, delay: index / 4000 });
+      // TweenMax.to(building.position, .6 + (index / 4000), { y: 1, ease: Quint.easeOut, delay: index / 4000 });
+      gsap.to(building.position, .6 + (index / 4000), { y: 1, ease: Quint.easeOut, delay: index / 4000 });
     });
   }
 
@@ -252,7 +279,8 @@ export default class App {
   draw() {
     const boxSize = 3;
     const meshParams = {
-      color: '#000',
+      // color: '#000',
+      color: '#111',
       metalness: 0,
       emissive: '#000',
       roughness: .77,
@@ -261,6 +289,23 @@ export default class App {
     const max = .009;
     const min = .001;
     const material = new THREE.MeshPhysicalMaterial(meshParams);
+
+
+    // ---------------------------------------------------------------------------------------
+    // const panel = { color: '#ffffff' };
+    // const planeGeometry = new THREE.PlaneGeometry(1, 1);
+    // const planeMaterial = new THREE.MeshStandardMaterial({
+    //   color: panel.color,
+    //   metalness: 0,
+    //   // emissive: '#000000',
+    //   emissive: '#ffffff',
+    //   roughness: 0,
+    // });
+
+    
+
+
+    //--------------------------------------------------------------------------------------------
 
     for (let i = 0; i < this.gridSize; i++) {
       for (let j = 0; j < this.gridSize; j++) {
@@ -278,8 +323,27 @@ export default class App {
     }
 
     this.scene.add(this.group);
-    // this.group.position.set(-this.gridSize - 10, 1, -this.gridSize - 10);
-    this.group.position.set(-this.gridSize - 10, 0, -this.gridSize - 10);
+    this.group.position.set(-this.gridSize - 10, 1, -this.gridSize - 10);
+    // this.group.position.set(-this.gridSize - 10, 0, -this.gridSize - 10);
+
+    //adding panel for roads
+    // for(let i = 0; i < this.gridSize; i++) {
+    //   for(let j = 0; j < this.gridSize; j++) {
+        
+    //     if(i !== boxSize * i && j !== boxSize * j) {
+          
+    //       const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    //       planeGeometry.rotateX(- Math.PI / 2);
+    //       plane.position.x = i;
+    //       plane.position.z = j;
+    //       this.scene.add(plane);
+    //     }
+        
+        
+    //   }
+    // }
+
+
   }
 
   onResize() {
